@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 const Users = () => {
   const [users, setUsers] = useState<IUser[] | null>(null);
   const [editingUser, setEditingUser] = useState<IUser | null>(null);
-  const [editedName, setEditedName] = useState("");
+  const [editedUser, setEditedUser] = useState<IUser | null>(null);
 
   useEffect(() => {
     request.get("/users").then((res) => {
@@ -29,16 +29,22 @@ const Users = () => {
 
   const handleEdit = (user: IUser) => {
     setEditingUser(user);
-    setEditedName(user.firstName);
+    setEditedUser({ ...user });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (editedUser) {
+      setEditedUser({ ...editedUser, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSaveEdit = () => {
-    if (editingUser && editedName) {
-      request.put(`/users/${editingUser.id}`, { firstName: editedName }).then(() => {
+    if (editingUser && editedUser) {
+      request.put(`/users/${editingUser.id}`, editedUser).then(() => {
         if (users) {
           const updatedUsers = users.map(user => {
             if (user.id === editingUser.id) {
-              return { ...user, firstName: editedName };
+              return editedUser;
             }
             return user;
           });
@@ -70,9 +76,38 @@ const Users = () => {
               <div>
                 <input 
                   type="text" 
-                  value={editedName} 
-                  onChange={(e) => setEditedName(e.target.value)} 
+                  name="firstName"
+                  value={editedUser?.firstName || ""} 
+                  onChange={handleInputChange} 
                   className="p-2 text-black rounded-md w-full"
+                />
+                <input 
+                  type="text" 
+                  name="lastName"
+                  value={editedUser?.lastName || ""} 
+                  onChange={handleInputChange} 
+                  className="p-2 text-black rounded-md w-full mt-2"
+                />
+                <input 
+                  type="text" 
+                  name="profession"
+                  value={editedUser?.profession || ""} 
+                  onChange={handleInputChange} 
+                  className="p-2 text-black rounded-md w-full mt-2"
+                />
+                <input 
+                  type="number" 
+                  name="age"
+                  value={editedUser?.age || ""} 
+                  onChange={handleInputChange} 
+                  className="p-2 text-black rounded-md w-full mt-2"
+                />
+                <input 
+                  type="text" 
+                  name="gender"
+                  value={editedUser?.gender || ""} 
+                  onChange={handleInputChange} 
+                  className="p-2 text-black rounded-md w-full mt-2"
                 />
                 <button 
                   onClick={handleSaveEdit} 
